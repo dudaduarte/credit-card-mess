@@ -2,7 +2,10 @@
   (:use clojure.pprint)
   (:require [java-time :as j]
             [credit_card_mess.hashmap-logic :as c.logic]
-            [credit_card_mess.models :as c.models]))
+            [credit_card_mess.models :as c.models]
+            [schema.core :as s]))
+
+(s/set-fn-validation! true)
 
 (println "------------------------------")
 (println "HASHMAP IMPLEMENTATION")
@@ -14,7 +17,7 @@
     (pprint @clients)
     (pprint @purchases)
     (pprint @credit-cards)
-    (c.logic/add-to-collection! clients (c.models/client "Duda" "54638723678" "duda@duda.com"))
+    (c.logic/add-to-collection! clients (c.models/client "Duda" 54638723678 "duda@duda.com"))
     (c.logic/add-to-collection! credit-cards (c.models/credit-card 1234567890 213 (j/plus (j/local-date-time) (j/years 2)) 1000 (c.logic/first-client-id @clients)))
     (c.logic/add-to-collection! purchases (c.models/purchase (j/local-date-time) 50 "Duda Store" :clothes (c.logic/first-card-id @credit-cards)))
     (c.logic/add-to-collection! purchases (c.models/purchase (j/local-date-time) 100 "Davi Store" :games (c.logic/first-card-id @credit-cards)))
