@@ -17,11 +17,10 @@
       j/value))
 
 (defn month-invoice [purchases month]
-  (let [get-value #(purchase-value %)]
-    (->> month
-         purchases
-         (map get-value)
-         (reduce +))))
+  (->> month
+       purchases
+       (map purchase-value)
+       (reduce +)))
 
 (defn search-purchases [purchases param-key func param-value]
   (filter #(func (get-in % [1 param-key]) param-value) purchases))
@@ -40,7 +39,7 @@
        first))
 
 (defn sum-purchases-values [val]
-  (reduce + (map #(purchase-value %) val)))
+  (reduce + (map purchase-value val)))
 
 (defn invoices-by-group
   ([pending-elements] (invoices-by-group {} pending-elements))

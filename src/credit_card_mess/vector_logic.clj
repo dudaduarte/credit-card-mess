@@ -10,12 +10,14 @@
       (j/property :month-of-year)
       j/value))
 
+(defn purchase-value [purchase]
+  (get purchase :value))
+
 (defn month-invoice-vec [purchases month]
-  (let [get-value #(get % :value)]
-    (->> month
-         purchases
-         (map get-value)
-         (reduce +))))
+  (->> month
+       purchases
+       (map purchase-value)
+       (reduce +)))
 
 (defn search-purchases [purchases param-key func param-value]
   (filter #(func param-value (get % param-key)) purchases))
@@ -34,7 +36,7 @@
        :id))
 
 (defn sum-purchases-values [val]
-  (reduce + (map #(get % :value) val)))
+  (reduce + (map purchase-value val)))
 
 (defn invoices-by-group
   ([pending-elements] (invoices-by-group {} pending-elements))
