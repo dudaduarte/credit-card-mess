@@ -1,4 +1,4 @@
-(defproject backend-1 "0.1.0-SNAPSHOT"
+(defproject credit_card_mess "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -6,4 +6,4 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [clojure.java-time "0.3.3"]
                  [prismatic/schema "1.2.0"]]
-  :repl-options {:init-ns backend-1.core})
+  :repl-options {:init-ns credit_card_mess.core})

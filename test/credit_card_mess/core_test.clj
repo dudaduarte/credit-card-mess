@@ -1,6 +1,6 @@
-(ns backend-1.core-test
+(ns credit_card_mess.core-test
   (:require [clojure.test :refer :all]
-            [backend-1.core :refer :all]))
+            [credit_card_mess.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."
