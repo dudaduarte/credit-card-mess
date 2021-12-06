@@ -28,13 +28,13 @@
     (pprint @credit-cards)
 
     (println "GROUP BY CATEGORY:")
-    (pprint (group-by c.logic/group-by-category @purchases))
+    (pprint (group-by c.logic/purchase-category @purchases))
 
     (println "GROUP BY MONTH")
-    (pprint (group-by c.logic/group-by-month @purchases))
+    (pprint (group-by c.logic/purchase-month @purchases))
 
     (println "MONTH INVOICE")
-    (pprint (c.logic/month-invoice (group-by c.logic/group-by-month @purchases) 11))
+    (pprint (c.logic/month-invoice (group-by c.logic/purchase-month @purchases) 12))
 
     (println "SEARCH PURCHASES BY VALUE")
     (pprint (c.logic/search-purchases @purchases :value >= 76))
@@ -43,9 +43,10 @@
     (pprint (c.logic/search-purchases-by-store @purchases "Duda Store"))
 
     (println "INVOICES BY MONTH:")
-    (pprint (c.logic/invoices-by-group (group-by c.logic/group-by-month @purchases)))
+    (pprint (c.logic/invoices-by-group (group-by c.logic/purchase-month @purchases)))
 
     (println "INVOICES BY CATEGORY:")
-    (pprint (c.logic/invoices-by-group (group-by c.logic/group-by-category @purchases)))))
+    (pprint (c.logic/invoices-by-group (group-by c.logic/purchase-category @purchases)))
+    ))
 
 (teste-hashmap)

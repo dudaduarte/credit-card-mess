@@ -1,49 +1,83 @@
 (ns credit_card_mess.hashmap-logic
-  (:require [java-time :as j]))
+  (:require [java-time :as j]
+            [schema.core :as s]
+            [credit-card-mess.schemas :as cs]))
 
-(defn add-to-collection! [coll item]
+(s/defn add-to-collection! :- cs/AnyPredefColls
+  [coll :- cs/AnyPredefCollsAtom
+   item :- (s/either cs/Purchase cs/CreditCard cs/Client)]
   (swap! coll assoc (:id item) item))
 
-(defn group-by-category [[_ item]]
-  (:category item))
+(s/defn purchase-category :- s/Keyword
+  [[_ purchase] :- cs/MapPurchases]
+  (:category purchase))
 
-(defn purchase-value [purchase]
-  (get-in purchase [1 :value]))
+(s/defn purchase-value :- s/Num
+  [[_ purchase] :- cs/MapPurchases]
+  (:value purchase))
 
-(defn group-by-month [[_ item]]
-  (-> item
+(s/defn purchase-month :- s/Num
+  [[_ purchase] :- cs/MapPurchases]
+  (-> purchase
       :date
       (j/property :month-of-year)
       j/value))
 
-(defn month-invoice [purchases month]
+(s/defn month-invoice :- s/Num
+  [grouped-purchases :- cs/GroupedByMonthPurchases
+   month :- s/Num]
   (->> month
-       purchases
+       grouped-purchases
        (map purchase-value)
        (reduce +)))
 
-(defn search-purchases [purchases param-key func param-value]
+(s/defn check-search-conditions
+  [param-key :- s/Keyword
+   func :- cs/Funcs]
+  (if (and
+        (not= func =)
+        (or (= param-key :store)
+            (= param-key :category)
+            (= param-key :credit-card-id)
+            (= param-key :id)))
+    (throw (ex-info "Wrong parameters. Functions different than = can only be used on keys :value or :date."
+                    {:parameter-key param-key
+                     :function func}))
+    true))
+
+(s/defn search-purchases :- [cs/MapPurchases]
+  [purchases :- cs/Purchases
+   param-key :- s/Keyword
+   func :- cs/Funcs
+   param-value :- (s/cond-pre cs/Categories s/Str s/Num)]
+  {:pre [(check-search-conditions param-key func)]}
   (filter #(func (get-in % [1 param-key]) param-value) purchases))
 
-(defn search-purchases-by-store [purchases store]
+(s/defn search-purchases-by-store :- [cs/MapPurchases]
+  [purchases :- cs/Purchases store :- s/Str]
   (search-purchases purchases :store = store))
 
-(defn first-card-id [credit-cards]
+(s/defn first-card-id :- s/Keyword
+  [credit-cards :- cs/CreditCards]
   (->> credit-cards
        keys
        first))
 
-(defn first-client-id [clients]
+(s/defn first-client-id :- s/Keyword
+  [clients :- cs/Clients]
   (->> clients
        keys
        first))
 
-(defn sum-purchases-values [val]
+(s/defn sum-purchases-values :- s/Num
+  [val :- [cs/MapPurchases]]
   (reduce + (map purchase-value val)))
 
-(defn invoices-by-group
-  ([pending-elements] (invoices-by-group {} pending-elements))
-  ([coll pending-elements]
+(s/defn invoices-by-group :- cs/GroupedValues
+  ([pending-elements :- cs/GroupedPurchases]
+   (invoices-by-group {} pending-elements))
+  ([coll :- cs/GroupedValues
+    pending-elements :- cs/GroupedPurchases]
    (if (seq pending-elements)
      (let [key (first (keys pending-elements))
            new-value (sum-purchases-values (first (vals pending-elements)))]

@@ -32,7 +32,7 @@
     (pprint (group-by :category @purchases))
 
     (println "MONTHLY INVOICE")
-    (pprint (c.logic/month-invoice-vec (group-by c.logic/group-by-month-vec @purchases) 11))
+    (pprint (c.logic/month-invoice-vec (group-by c.logic/purchase-month-vec @purchases) 11))
 
     (println "SEARCH PURCHASES BY VALUE")
     (pprint (c.logic/search-purchases @purchases :value >= 76))
@@ -41,7 +41,7 @@
     (pprint (c.logic/search-purchases-by-store @purchases "Duda Store"))
 
     (println "INVOICES BY MONTH:")
-    (pprint (c.logic/invoices-by-group (group-by c.logic/group-by-month-vec @purchases)))
+    (pprint (c.logic/invoices-by-group (group-by c.logic/purchase-month-vec @purchases)))
 
     (println "INVOICES BY CATEGORY:")
     (pprint (c.logic/invoices-by-group (group-by :category @purchases)))))

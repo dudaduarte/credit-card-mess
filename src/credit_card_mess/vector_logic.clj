@@ -4,7 +4,7 @@
 (defn add-to-vector! [vec item]
   (swap! vec conj item))
 
-(defn group-by-month-vec [item]
+(defn purchase-month-vec [item]
   (-> item
       :date
       (j/property :month-of-year)
