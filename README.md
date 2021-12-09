@@ -4,7 +4,14 @@ A Clojure library designed to ... well, that part is up to you.
 
 ## Usage
 
-FIXME
+### Datomic:
+Inside your datomic peer api folder, run
+`bin/transactor config/dev-transactor-template.properties`
+
+To access datomic console, run:
+`bin/console -p 8080 dev datomic:dev://localhost:4334/`
+After that, you can access datomic console through your browser, on the following address:
+`http://localhost:8080/browse`
 
 ## License
 

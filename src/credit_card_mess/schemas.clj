@@ -1,44 +1,39 @@
 (ns credit-card-mess.schemas
   (:require [schema.core :as s])
-  (:import java.time.LocalDateTime))
+  (:import java.util.Date))
 
 (def Categories (s/enum :food :clothes :games :health))
 (def PosInt (s/constrained s/Num pos?))
 
 (def Client
-  {:id    s/Keyword
-   :name  s/Str
-   :cpf   PosInt
-   :email s/Str})
+  {(s/optional-key :db/id) s/Num
+   :client/id    s/Uuid
+   :client/name  s/Str
+   :client/cpf   PosInt
+   :client/email s/Str})
 
 (def CreditCard
-  {:id        s/Keyword
-   :number    PosInt
-   :cvv       PosInt
-   :due-date  LocalDateTime
-   :limit     PosInt
-   :client-id s/Keyword})
+  {(s/optional-key :db/id) s/Num
+   :credit-card/id        s/Uuid
+   :credit-card/number    PosInt
+   :credit-card/cvv       PosInt
+   :credit-card/due-date  Date
+   :credit-card/limit     PosInt
+   :credit-card/client-id s/Uuid})
 
 (def Purchase
-  {:id             s/Keyword
-   :date           LocalDateTime
-   :value          PosInt
-   :store          s/Str
-   :category       Categories
-   :credit-card-id s/Keyword})
+  {(s/optional-key :db/id) s/Num
+   :purchase/id             s/Uuid
+   :purchase/date           Date
+   :purchase/value          PosInt
+   :purchase/store          s/Str
+   :purchase/category       Categories
+   :purchase/credit-card-id s/Uuid})
 
-(def MapPurchases [(s/cond-pre s/Keyword Purchase)])
+(def Purchases [[Purchase]])
+(def CreditCards [[CreditCard]])
+(def Clients [[Client]])
 (def GroupedValues {(s/cond-pre s/Keyword s/Num s/Str) s/Num})
-(def GroupedPurchases {(s/cond-pre s/Keyword s/Num s/Str) [MapPurchases]})
-(def GroupedByMonthPurchases {s/Num [MapPurchases]})
+(def GroupedPurchases {(s/cond-pre s/Keyword s/Num s/Str) Purchases})
+(def GroupedByMonthPurchases {s/Num Purchases})
 (def Funcs (s/enum < <= > >= =))
-(def Purchases {s/Keyword Purchase})
-(def CreditCards {s/Keyword CreditCard})
-(def Clients {s/Keyword Client})
-(def AnyPredefColls (s/either Clients CreditCards Purchases))
-(def AnyPredefCollsAtom (s/->Atomic (s/cond-pre AnyPredefColls {})))
-
-;(s/conditional #(= (:type %) :bird) {:type (s/eq :bird) :chirping s/Bool}
-;               #(= (:type %) :fish) {:type (s/eq :fish) :swimming s/Bool}
-;               ...
-;               :default  {:type (s/eq :animal) :existing s/Bool})

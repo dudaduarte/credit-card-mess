@@ -5,5 +5,6 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [clojure.java-time "0.3.3"]
-                 [prismatic/schema "1.2.0"]]
+                 [prismatic/schema "1.2.0"]
+                 [com.datomic/datomic-pro "1.0.6344"]]
   :repl-options {:init-ns credit_card_mess.core})
