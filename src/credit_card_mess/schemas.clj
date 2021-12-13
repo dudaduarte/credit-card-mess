@@ -4,31 +4,32 @@
 
 (def Categories (s/enum :food :clothes :games :health))
 (def PosInt (s/constrained s/Num pos?))
+(def DbItem {:db/id s/Num})
 
 (def Client
   {(s/optional-key :db/id) s/Num
-   :client/id    s/Uuid
-   :client/name  s/Str
-   :client/cpf   PosInt
-   :client/email s/Str})
+   :client/name            s/Str
+   :client/cpf             PosInt
+   :client/email           s/Str
+   :client/id              s/Uuid})
 
 (def CreditCard
-  {(s/optional-key :db/id) s/Num
-   :credit-card/id        s/Uuid
-   :credit-card/number    PosInt
-   :credit-card/cvv       PosInt
-   :credit-card/due-date  Date
-   :credit-card/limit     PosInt
-   :credit-card/client-id s/Uuid})
+  {(s/optional-key :db/id)              s/Num
+   :credit-card/number                  PosInt
+   :credit-card/cvv                     PosInt
+   :credit-card/due-date                Date
+   :credit-card/limit                   PosInt
+   :credit-card/id                      s/Uuid
+   (s/optional-key :credit-card/client) DbItem})
 
 (def Purchase
-  {(s/optional-key :db/id) s/Num
-   :purchase/id             s/Uuid
-   :purchase/date           Date
-   :purchase/value          PosInt
-   :purchase/store          s/Str
-   :purchase/category       Categories
-   :purchase/credit-card-id s/Uuid})
+  {(s/optional-key :db/id)                s/Num
+   :purchase/date                         Date
+   :purchase/value                        PosInt
+   :purchase/store                        s/Str
+   :purchase/category                     Categories
+   :purchase/id                           s/Uuid
+   (s/optional-key :purchase/credit-card) DbItem})
 
 (def Purchases [[Purchase]])
 (def CreditCards [[CreditCard]])

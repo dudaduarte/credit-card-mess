@@ -1,7 +1,8 @@
 (ns credit_card_mess.hashmap-logic
   (:require [java-time :as j]
             [schema.core :as s]
-            [credit-card-mess.schemas :as cs]))
+            [credit-card-mess.schemas :as cs])
+  (:use [clojure.string :only (join split)]))
 
 (s/defn purchase-category :- s/Keyword
   [purchase :- [cs/Purchase]]
@@ -20,7 +21,7 @@
   (-> purchase
       first
       :purchase/date
-      j/local-date-time
+      j/local-date
       (j/property :month-of-year)
       j/value))
 
@@ -40,7 +41,7 @@
         (or (= param-key :purchase/store)
             (= param-key :purchase/category)
             (= param-key :purchase/credit-card-id)
-            (= param-key :purchase/id)))
+            (= param-key :db/id)))
     (throw (ex-info "Wrong parameters. Functions different than = can only be used on key :purchase/value."
                     {:parameter-key param-key
                      :function func}))
@@ -58,17 +59,12 @@
   [purchases :- cs/Purchases store :- s/Str]
   (search-purchases purchases :purchase/store = store))
 
-(s/defn first-card-id :- s/Uuid
+(s/defn first-card-id :- s/Num
   [credit-cards :- cs/CreditCards]
+  (println "TESTE:" credit-cards)
   (->> credit-cards
        ffirst
-       :credit-card/id))
-
-(s/defn first-client-id :- s/Uuid
-  [clients :- cs/Clients]
-  (->> clients
-       ffirst
-       :client/id))
+       :db/id))
 
 (s/defn sum-purchases-values :- s/Num
   [val :- cs/Purchases]
@@ -84,3 +80,16 @@
            new-value (sum-purchases-values (first (vals pending-elements)))]
        (recur (assoc coll key new-value) (dissoc pending-elements key)))
      coll)))
+
+(s/defn non-zero-number :- s/Num []
+  (let [number (rand-int 10)]
+    (if (zero? number)
+      (recur)
+      number)))
+
+(s/defn rand-num :- s/Num [len :- s/Num]
+  (->> non-zero-number
+       repeatedly
+       (take len)
+       join
+       read-string))

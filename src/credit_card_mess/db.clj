@@ -19,17 +19,25 @@
 (defn create-schema! [conn]
   (d/transact conn models/schema))
 
-(s/defn save-clients!
-        [conn clients :- [cs/Client]]
-        (d/transact conn clients))
+(defn transaction [conn client credit-card]
+  (let [tempid "tempid-1"
+        client (assoc client :db/id tempid)
+        credit-card (assoc credit-card :credit-card/client tempid)]
+    (d/transact conn [client credit-card])))
 
-(s/defn save-credit-cards!
-        [conn credit-cards :- [cs/CreditCard]]
-        (d/transact conn credit-cards))
+(s/defn save-clients-and-credit-cards!
+  [conn clients-and-credit-cards :- [{:client      cs/Client
+                                      :credit-card cs/CreditCard}]]
+  (map #(transaction conn (:client %) (:credit-card %)) clients-and-credit-cards))
+
+(defn add-ref-purchases [credit-card-id purchases]
+  (map #(assoc % :purchase/credit-card [:credit-card/id credit-card-id]) purchases))
 
 (s/defn save-purchases!
-        [conn purchases]
-        (d/transact conn purchases))
+  [conn purchases :- [cs/Purchase] credit-card-id :- s/Uuid]
+  (->> purchases
+       (add-ref-purchases credit-card-id)
+       (d/transact conn)))
 
 (defn get-clients [db]
   (d/q '[:find (pull ?entity [*])
@@ -48,3 +56,37 @@
                 :in $ ?key ?val
                 :where [?entity ?key ?val]]]
     (d/q query db key val)))
+
+(defn purchases-by-client [db]
+  (d/q '[:find (pull ?client [*]) (count ?purchase)
+         :keys client purchases
+         :where [?purchase :purchase/credit-card ?credit-card]
+         [?credit-card :credit-card/client ?client]] db))
+
+;(defn client-who-bought-the-most [db]
+;  (->> db
+;       purchases-by-client
+;       (apply max-key :purchases)))
+
+(defn client-who-bought-the-most [db]
+  (d/q '[:find [(max ?count) (pull ?client [*])]
+         :where [(q '[:find (count ?purchase) ?client
+                      :where [?purchase :purchase/credit-card ?credit-card]
+                      [?credit-card :credit-card/client ?client]]
+                    $) [[?count ?client]]]] db))
+
+(defn client-who-spent-more [db]
+  (d/q '[:find (pull ?client [*]) ?max-value
+         :keys client max-value
+         :where [(q '[:find (max ?value)
+                      :where [_ :purchase/value ?value]]
+                    $) [[?max-value]]]
+         [?purchase :purchase/value ?value]
+         [(= ?value ?max-value)]
+         [?purchase :purchase/credit-card ?credit-card]
+         [?credit-card :credit-card/client ?client]] db))
+
+(defn clients-who-never-bought [db]
+  (d/q '[:find (pull ?client [*])
+         :where [?credit-card :credit-card/client ?client]
+         (not [_ :purchase/credit-card ?credit-card])] db))
